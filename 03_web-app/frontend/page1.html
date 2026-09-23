@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stations IRVE</title>
+    <link rel="stylesheet" href="CSS/style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+</head>
+<body>
+
+    <header class="header">
+        <!--logos du site-->
+        <div class="logos">
+            <img src="./logo/IRVE.png" alt="Logo IRVE" class="IRVE">
+            <img src="./logo/ISEN.png" alt="Logo ISEN" class="ISEN">
+        </div>
+<!--menu de navigation-->
+        <nav class="navbar">
+            <a href="index.html">Accueil</a>
+            <a href="page1.html" class="active">Visualisation</a>
+            <a href="page2.html">Statistiques</a>
+        </nav>
+    </header>
+
+    <main class="main">
+<!--affiche les infos de la base de données dans un tableau-->
+        <section class="card">
+            <h2>Tableau des points de charge IRVE</h2>
+            <p>Affichage des points de charge issus de la base de données.</p>
+            <p><em>Cochez un point de charge pour activer les prédictions ci-dessous.</em></p>
+
+            <table class="station-table">
+                <thead>
+                    <tr>
+                        <th>Sélection</th>
+                        <th>ID</th>
+                        <th>Nom station</th>
+                        <th>Ville</th>
+                        <th>Type de prise</th>
+                        <th>Fournisseur</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body"></tbody>
+            </table>
+        </section>
+<!--affiche les stations sur une carte-->
+        <section class="card">
+            <h2>Carte des stations IRVE</h2>
+            <p>Cliquez sur un marqueur pour afficher les informations d'une station.</p>
+            <div id="map" style="height: 450px; width: 100%;"></div>
+        </section>
+<!--permet d'accéder aux pages de prédictions-->
+        <section class="prediction-buttons">
+            <a href="prediction_cluster.html">Prédire cluster</a>
+            <button id="btn-predire-implantation" type="button">Prédire implantation</button>
+            <button id="btn-predire-puissance" type="button">Prédire puissance</button>
+        </section>
+
+    </main>
+
+    <footer class="footer">
+        <h5>Mentions Légales © 2026 Copyright</h5>
+        <h4>Réalisé par le Groupe 5: Elouen, Brayan, Maël</h4>
+    </footer>
+
+    <script>
+        // Carte
+        const map = L.map('map').setView([46.6, 2.5], 6);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+//appelle le fichier pour récupérer les stations dans MySQL
+        fetch('php/api_stations.php')
+            .then(r => r.json())
+            .then(stations => {
+                //parcourt toutes les stations
+                stations.forEach(s => {
+                    L.marker([parseFloat(s.latitude), parseFloat(s.longitude)]).addTo(map)
+                    //affiche les infos des stations quand on clique dessus
+                        .bindPopup(`
+                            <strong>${s.nom}</strong><br>
+                            Ville : ${s.nom_ville}<br>
+                            Fournisseur : ${s.nom_fournisseur}<br>
+                            Accès : ${s.condition_acces}<br>
+                            PMR : ${s.accessibilite_pmr}
+                        `);
+                });
+            })
+            .catch(e => console.error('Erreur chargement stations :', e));
+
+        // Tableau des points de charge
+        function typesPrise(p) {
+            const types = [];
+            if (p.prise_type_combo_ccs == 1) types.push('Combo CCS');
+            if (p.prise_type_2 == 1) types.push('Type 2');
+            if (p.prise_type_ef == 1) types.push('EF');
+            if (p.prise_type_chademo == 1) types.push('CHAdeMO');
+            return types.join(', ') || '—';
+        }
+
+        fetch('php/api_points_de_charge.php')
+            .then(r => r.json())
+            .then(points => {
+                const tbody = document.getElementById('table-body');
+                points.slice(0, 10).forEach(p => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><input type="radio" name="selection_pdc" value="${p.id_point_charge}"></td>
+                        <td>${p.id_point_charge}</td>
+                        <td>${p.nom_station}</td>
+                        <td>${p.nom_ville}</td>
+                        <td>${typesPrise(p)}</td>
+                        <td>${p.nom_fournisseur}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            })
+            .catch(e => console.error('Erreur chargement points de charge :', e));
+
+        // Récupère l'id du point de charge actuellement sélectionné (bouton radio).
+        // Renvoie null et affiche une alerte si rien n'est sélectionné.
+        function getSelectionPointCharge() {
+            const selection = document.querySelector('input[name="selection_pdc"]:checked');
+            if (!selection) {
+                alert('Veuillez sélectionner un point de charge dans le tableau avant de lancer la prédiction.');
+                return null;
+            }
+            return selection.value;
+        }
+
+        // Bouton "Prédire implantation" : même sélection radio, redirige vers la page de prédiction d'implantation avec l'id en paramètre d'URL.
+        document.getElementById('btn-predire-implantation').addEventListener('click', () => {
+            const idPointCharge = getSelectionPointCharge();
+            if (!idPointCharge) return;
+            window.location.href = 'prediction_implantation.html?id=' + encodeURIComponent(idPointCharge);
+        });
+
+        // Bouton "Prédire puissance" : récupère le point de charge sélectionné puis redirige vers la page de prédiction avec son id en paramètre d'URL.
+        document.getElementById('btn-predire-puissance').addEventListener('click', () => {
+            const idPointCharge = getSelectionPointCharge();
+            if (!idPointCharge) return;
+            window.location.href = 'prediction_puissance.html?id=' + encodeURIComponent(idPointCharge);
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prédiction de la puissance nominale - Stations IRVE</title>
+
+    <!-- Feuille de style principale -->
+    <link rel="stylesheet" href="CSS/style.css">
+</head>
+
+<body>
+
+    <!-- En-tête avec les logos et la barre de navigation -->
+    <header class="header">
+        <div class="logos">
+            <img src="./logo/IRVE.png" alt="Logo IRVE" class="IRVE">
+            <img src="./logo/ISEN.png" alt="Logo ISEN" class="ISEN">
+        </div>
+
+        <nav class="navbar">
+            <a href="index.html">Accueil</a>
+            <a href="page1.html">Visualisation</a>
+            <a href="page2.html">Statistiques</a>
+        </nav>
+    </header>
+
+    <main class="main">
+
+        <!-- Carte principale affichant l'identifiant du point de charge et le résultat de la prédiction -->
+        <section class="card">
+            <h2>Prédiction de la puissance nominale</h2>
+
+            <p>
+                Point de charge sélectionné :
+                <strong id="id-pdc">—</strong>
+            </p>
+
+            <!-- Zone mise à jour dynamiquement avec le résultat de la prédiction -->
+            <div id="resultat-prediction">
+                <p>Chargement de la prédiction en cours...</p>
+            </div>
+
+            <a class="btn-retour" href="page1.html">
+                <span class="fleche">&larr;</span>
+                Retour au tableau des points de charge
+            </a>
+        </section>
+
+    </main>
+
+    <footer class="footer">
+        <h5>Mentions Légales © 2026 Copyright</h5>
+        <h4>Réalisé par le Groupe 5 : Elouen, Brayan, Maël</h4>
+    </footer>
+
+    <script>
+    // Récupère l'identifiant du point de charge depuis l'URL (paramètre GET 'id')
+    const params = new URLSearchParams(window.location.search);
+    const idPointCharge = params.get('id');
+
+    // Récupère les éléments HTML à mettre à jour
+    const idElement   = document.getElementById('id-pdc');
+    const zoneResultat = document.getElementById('resultat-prediction');
+
+    // Affiche l'identifiant du point de charge dans la page
+    idElement.textContent = idPointCharge ?? 'inconnu';
+
+    // Si aucun identifiant n'est fourni, affiche un message d'erreur, sinon lance la prédiction
+    if (!idPointCharge) {
+        zoneResultat.innerHTML = `
+            <p style="color:red;">
+                Aucun point de charge sélectionné.
+            </p>
+        `;
+    } else {
+        chargerPrediction(idPointCharge);
+    }
+
+    // Appelle l'API PHP pour récupérer la prédiction de puissance du point de charge
+    function chargerPrediction(id) {
+        try {
+            // Construit l'URL de l'API avec le paramètre id_point_charge
+            const apiUrl = new URL('./php/api_prediction_puissance.php', window.location.href);
+            apiUrl.searchParams.set('id_point_charge', id);
+
+            console.log('URL appelée :', apiUrl.toString());
+
+            fetch(apiUrl.toString())
+                .then(response => {
+                    // Vérifie que la réponse HTTP est correcte
+                    if (!response.ok) {
+                        throw new Error('Erreur HTTP : ' + response.status);
+                    }
+                    // Récupère la réponse sous forme de texte brut
+                    return response.text();
+                })
+                .then(text => {
+                    console.log('Réponse brute PHP :', text);
+
+                    let data;
+
+                    // Tente de parser le texte en JSON
+                    try {
+                        data = JSON.parse(text);
+                    } catch (e) {
+                        throw new Error('Réponse PHP non JSON : ' + text);
+                    }
+
+                    // Si l'API renvoie une erreur, on l'affiche dans la zone de résultat
+                    if (data.erreur || data.error) {
+                        zoneResultat.innerHTML = `
+                            <p style="color:red;">
+                                Erreur : ${data.erreur || data.error || data.details || 'inconnue'}
+                            </p>
+                        `;
+                        return;
+                    }
+
+                    // Si la puissance prédite est absente de la réponse, affiche un message d'erreur
+                    if (data.puissance_predite_kw === undefined || data.puissance_predite_kw === null) {
+                        zoneResultat.innerHTML = `
+                            <p style="color:red;">
+                                Aucune puissance prédite renvoyée par l'API.
+                            </p>
+                        `;
+                        return;
+                    }
+
+                    // Affiche le résultat de la prédiction
+                    afficherPrediction(data);
+                })
+                .catch(error => {
+                    // En cas d'erreur de fetch, affiche le détail technique
+                    console.error('Erreur fetch prédiction puissance :', error);
+
+                    zoneResultat.innerHTML = `
+                        <p style="color:red;">
+                            Erreur lors de la communication avec le serveur.
+                        </p>
+                        <p>
+                            Détail technique : ${error.message}
+                        </p>
+                    `;
+                });
+
+        } catch (error) {
+            // En cas d'erreur lors de la construction de l'URL
+            console.error('Erreur construction URL :', error);
+
+            zoneResultat.innerHTML = `
+                <p style="color:red;">
+                    Erreur lors de la construction de l'URL API.
+                </p>
+                <p>
+                    Détail technique : ${error.message}
+                </p>
+            `;
+        }
+    }
+
+    // Génère et injecte le tableau HTML affichant la méthode et la puissance prédite
+    function afficherPrediction(data) {
+        const methode   = data.methode ?? 'Modèle IA';
+        const puissance = Number(data.puissance_predite_kw);
+
+        // Formate la puissance avec 2 décimales si c'est un nombre valide
+        const puissanceAffichee = isNaN(puissance)
+            ? data.puissance_predite_kw
+            : puissance.toFixed(2);
+
+        zoneResultat.innerHTML = `
+            <table class="station-table">
+                <thead>
+                    <tr>
+                        <th>Méthode</th>
+                        <th>Puissance prédite</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr>
+                        <td>${methode}</td>
+                        <td>${puissanceAffichee} kW</td>
+                    </tr>
+                </tbody>
+            </table>
+        `;
+    }
+</script>
+
+</body>
+</html>

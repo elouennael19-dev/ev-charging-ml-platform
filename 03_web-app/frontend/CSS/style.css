@@ -1,0 +1,514 @@
+/* Réinitialisation des marges, paddings et modèle de boîte pour tous les éléments */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Style général de la page */
+body {
+  font-family: Arial, sans-serif;
+  background-color: lightblue;
+  color: #111827;
+}
+
+/* HEADER */
+
+/* Barre d'en-tête blanche avec une bordure basse */
+.header {
+  background-color: white;
+  padding: 25px 8%;
+  border-bottom: 1px solid #ddd;
+}
+
+/* Conteneur des logos, disposés en ligne avec espace entre eux */
+.logos {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 30px;
+  margin-bottom: 35px;
+}
+
+/* Taille maximale des logos IRVE et ISEN */
+.IRVE,
+.ISEN {
+  max-width: 220px;
+  width: 25%;
+  height: auto;
+  object-fit: contain;
+}
+
+/* NAVIGATION */
+
+/* Barre de navigation centrée avec les liens de page */
+.navbar {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Style des liens de navigation */
+.navbar a {
+  text-decoration: none;
+  color: #60708a;
+  background-color: white;
+  border: 1px solid #ddd;
+  padding: 16px 32px;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+/* Effet au survol des liens de navigation */
+.navbar a:hover {
+  background-color: #eef3f8;
+}
+
+/* Lien actif mis en évidence en bleu */
+.navbar .active {
+  background-color: #0788d1;
+  color: white;
+}
+
+/* MAIN */
+
+/* Zone de contenu principale avec hauteur minimale et marges latérales */
+.main {
+  min-height: 70vh;
+  padding: 70px 8%;
+}
+
+/* Conteneur de la page d'accueil en deux colonnes égales */
+.home-container {
+  max-width: 1400px;
+  margin: auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+}
+
+/* CARTES */
+
+/* Style commun aux cartes de texte, d'image et génériques */
+.text-card,
+.image-card,
+.card {
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 40px;
+}
+
+/* Hauteur minimale des cartes texte et image */
+.text-card,
+.image-card {
+  min-height: 330px;
+}
+
+/* Titre des cartes texte */
+.text-card h1,
+.text-card h2 {
+  font-size: 32px;
+  margin-bottom: 30px;
+}
+
+/* Paragraphe des cartes texte */
+.text-card p {
+  color: #60708a;
+  font-size: 20px;
+  line-height: 1.6;
+  margin-bottom: 25px;
+}
+
+/* Carte image centrée horizontalement et verticalement */
+.image-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Conteneur de l'image centré dans la carte */
+.image-placeholder {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Image de la borne avec taille maximale contrainte */
+.borne {
+  max-width: 80%;
+  max-height: 300px;
+  height: auto;
+  object-fit: contain;
+}
+
+/* PAGE 1 */
+
+/* Marge basse entre les cartes de la page 1 */
+.card {
+  margin-bottom: 45px;
+}
+
+.card h2 {
+  font-size: 30px;
+  margin-bottom: 10px;
+}
+
+.card p {
+  color: #60708a;
+  font-size: 18px;
+  margin-bottom: 25px;
+}
+
+/* Carte iframe de la carte interactive */
+.map-frame {
+  width: 100%;
+  height: 520px;
+  border: none;
+  border-radius: 8px;
+  background-color: #111827;
+}
+
+/* Tableau listant les stations */
+.station-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.station-table th,
+.station-table td {
+  padding: 16px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+
+.station-table th {
+  color: #60708a;
+  font-weight: bold;
+}
+
+/* Grille des boutons de prédiction en 3 colonnes */
+.prediction-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 25px;
+  margin-bottom: 45px;
+}
+
+/* Style des boutons de prédiction */
+.prediction-buttons a,
+.prediction-buttons button {
+  display: block;
+  width: 100%;
+  text-align: center;
+  text-decoration: none;
+  color: #0788d1;
+  border: 2px solid #0788d1;
+  padding: 18px;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 20px;
+  font-weight: bold;
+  background-color: white;
+  cursor: pointer;
+}
+
+/* Effet au survol des boutons de prédiction */
+.prediction-buttons a:hover,
+.prediction-buttons button:hover {
+  background-color: #0788d1;
+  color: white;
+}
+
+/* PAGE 2 */
+
+/* Conteneur centré pour le contenu de la page statistiques */
+.content {
+  max-width: 1200px;
+  margin: auto;
+}
+
+/* Sous-titre gris sous le titre principal */
+.subtitle {
+  color: #60708a;
+  font-size: 18px;
+}
+
+/* Carte contenant le menu déroulant de sélection du département */
+.select-box {
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 30px;
+  margin-top: 30px;
+  max-width: 500px;
+}
+
+.select-box label {
+  display: block;
+  color: #60708a;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+/* Style du menu déroulant */
+select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 16px;
+  background: white;
+}
+
+/* Zone d'affichage des statistiques ou du message d'aide */
+.info-box {
+  margin-top: 30px;
+  padding: 30px;
+  border-radius: 12px;
+  background: white;
+  border: 1px dashed #d1d5db;
+  font-size: 18px;
+  color: #60708a;
+}
+
+/* FORMULAIRES PREDICTION */
+
+/* Grille en deux colonnes pour les champs du formulaire de prédiction */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 25px;
+}
+
+/* Carte individuelle d'un champ de formulaire */
+.form-card {
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 25px;
+}
+
+.form-card label {
+  display: block;
+  color: #60708a;
+  font-weight: bold;
+  margin-bottom: 12px;
+  font-size: 18px;
+}
+
+/* Style des champs de saisie et menus déroulants dans les formulaires */
+.form-card input,
+.form-card select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 5px;
+  font-size: 17px;
+  background-color: #e8f1fb;
+}
+
+/* Texte d'aide sous un champ de formulaire */
+.form-card small {
+  display: block;
+  margin-top: 8px;
+  color: #60708a;
+}
+
+/* Zone d'affichage du résultat de prédiction */
+.result-box {
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 28px;
+  margin-top: 35px;
+  margin-bottom: 25px;
+}
+
+/* Bouton principal de lancement de la prédiction */
+.main-button {
+  background-color: #0788d1;
+  color: white;
+  border: none;
+  padding: 18px 45px;
+  border-radius: 6px;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* FOOTER */
+
+/* Pied de page centré avec bordure haute */
+.footer {
+  background-color: white;
+  text-align: center;
+  padding: 25px;
+  border-top: 1px solid #ddd;
+}
+
+.footer h5 {
+  color: blue;
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.footer h4 {
+  color: #333;
+  font-size: 20px;
+}
+
+/* RESPONSIVE */
+
+/* Adaptation de la mise en page pour les écrans inférieurs à 900px */
+@media screen and (max-width: 900px) {
+  .header,
+  .main {
+    padding-left: 30px;
+    padding-right: 30px;
+  }
+
+  /* Logos centrés et retour à la ligne si nécessaire */
+  .logos {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .IRVE,
+  .ISEN {
+    width: 160px;
+    max-width: 45%;
+  }
+
+  /* Les grilles passent en colonne unique */
+  .home-container,
+  .prediction-buttons,
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .navbar a {
+    padding: 12px 24px;
+    font-size: 16px;
+  }
+
+  .text-card,
+  .image-card,
+  .card {
+    padding: 25px;
+  }
+
+  .text-card p {
+    font-size: 17px;
+  }
+
+  .station-table {
+    font-size: 14px;
+  }
+}
+
+/* Adaptation supplémentaire pour les très petits écrans */
+@media screen and (max-width: 500px) {
+  /* Navigation en colonne avec liens pleine largeur */
+  .navbar {
+    flex-direction: column;
+  }
+
+  .navbar a {
+    width: 100%;
+    text-align: center;
+  }
+
+  .IRVE,
+  .ISEN {
+    width: 140px;
+  }
+}
+
+/* Carte Leaflet de la page visualisation */
+#map {
+  width: 100%;
+  height: 520px;
+  border-radius: 8px;
+}
+
+/* Carte Leaflet de la page clusters */
+#clusterMap {
+  width: 100%;
+  height: 600px;
+  border-radius: 8px;
+}
+
+/* Légende des clusters avec les pastilles colorées */
+.cluster-legend {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  color: #60708a;
+  font-weight: bold;
+}
+
+/* Pastille ronde pour identifier chaque cluster dans la légende */
+.cluster-dot {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+/* Couleur associée à chaque cluster */
+.cluster-0 { background-color: #84cc16; }
+.cluster-1 { background-color: #60a5fa; }
+.cluster-2 { background-color: #ec4899; }
+.cluster-3 { background-color: #8b5cf6; }
+.cluster-4 { background-color: #f97316; }
+
+/* Bouton de retour avec dégradé bleu et animation au survol */
+a.btn-retour {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 18px;
+    padding: 11px 20px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #ffffff !important;
+    text-decoration: none !important;
+    background: linear-gradient(135deg, #277f9d, #2878d9);
+    border-radius: 10px;
+    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+/* Légère élévation du bouton au survol */
+a.btn-retour:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(79, 70, 229, 0.45);
+    background: linear-gradient(135deg, #277f9d, #2878d9);
+    color: #ffffff !important;
+}
+
+/* Retour à la position initiale au clic */
+a.btn-retour:active {
+    transform: translateY(0);
+    box-shadow: 0 3px 10px rgba(79, 70, 229, 0.35);
+}
+
+/* Flèche du bouton retour */
+a.btn-retour .fleche {
+    font-size: 18px;
+    line-height: 1;
+    transition: transform 0.15s ease;
+}
+
+/* La flèche glisse vers la gauche au survol */
+a.btn-retour:hover .fleche {
+    transform: translateX(-3px);
+}

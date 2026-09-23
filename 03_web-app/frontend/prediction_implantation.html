@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prédiction de la puissance nominale - Stations IRVE</title>
+
+    <!-- Feuille de style principale -->
+    <link rel="stylesheet" href="CSS/style.css">
+</head>
+
+<body>
+
+    <!-- En-tête avec les logos et la barre de navigation -->
+    <header class="header">
+        <div class="logos">
+            <img src="./logo/IRVE.png" alt="Logo IRVE" class="IRVE">
+            <img src="./logo/ISEN.png" alt="Logo ISEN" class="ISEN">
+        </div>
+
+        <nav class="navbar">
+            <a href="index.html">Accueil</a>
+            <a href="page1.html">Visualisation</a>
+            <a href="page2.html">Statistiques</a>
+        </nav>
+    </header>
+
+    <main class="main">
+
+        <!-- Carte principale affichant l'identifiant du point de charge et le résultat de la prédiction -->
+        <section class="card">
+            <h2>Prédiction de l implantation</h2>
+
+            <p>
+                Point de charge sélectionné :
+                <strong id="id-pdc">—</strong>
+            </p>
+
+            <!-- Zone mise à jour dynamiquement avec le résultat de la prédiction -->
+            <div id="resultat-prediction">
+                <p>Chargement de la prédiction en cours...</p>
+            </div>
+
+            <a class="btn-retour" href="page1.html">
+                <span class="fleche">&larr;</span>
+                Retour au tableau des points de charge
+            </a>
+        </section>
+
+    </main>
+
+    <footer class="footer">
+        <h5>Mentions Légales © 2026 Copyright</h5>
+        <h4>Réalisé par le Groupe 5 : Elouen, Brayan, Maël</h4>
+    </footer>
+
+    <script>
+"use strict";
+
+// Récupération de l'identifiant dans l'URL 
+const params        = new URLSearchParams(window.location.search);
+const idPointCharge = params.get("id_point_charge") ?? params.get("id");
+
+const idEl   = document.getElementById("id-pdc");
+const zone   = document.getElementById("resultat-prediction");
+
+idEl.textContent = idPointCharge ?? "inconnu";
+
+if (!idPointCharge) {
+    afficherErreur("Aucun point de charge sélectionné (paramètre id_point_charge manquant).");
+} else {
+    chargerPrediction(idPointCharge);
+}
+
+// Appel API 
+function chargerPrediction(id) {
+    const apiUrl = new URL("./php/api_prediction_implantation.php", window.location.href);
+    apiUrl.searchParams.set("id_point_charge", id);
+
+    fetch(apiUrl.toString())
+        .then(response => {
+            if (!response.ok) throw new Error(`Erreur HTTP ${response.status}`);
+            return response.text();
+        })
+        .then(text => {
+            let data;
+            try { data = JSON.parse(text); }
+            catch (_) { throw new Error("Réponse non JSON : " + text); }
+
+            if (data.erreur) {
+                afficherErreur(data.erreur + (data.details ? ` — ${data.details}` : ""));
+                return;
+            }
+            if (!data.implantation_predite) {
+                afficherErreur("Aucune implantation prédite renvoyée par l'API.");
+                return;
+            }
+
+            afficherPrediction(data);
+        })
+        .catch(err => afficherErreur(err.message));
+}
+
+function afficherPrediction(data) {
+    const methode      = data.methode ?? "Modèle inconnu";
+    const implantation = data.implantation_predite;
+
+    zone.innerHTML = `
+        <table class="result-table">
+            <thead>
+                <tr><th>Modèle utilisé</th><th>Implantation prédite</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>${escHtml(methode)}</td>
+                    <td><span class="badge">${escHtml(implantation)}</span></td>
+                </tr>
+            </tbody>
+        </table>
+        ${renderProbas(data.probabilites)}
+    `;
+}
+
+function renderProbas(probabilites) {
+    if (!probabilites || Object.keys(probabilites).length === 0) return "";
+
+    const sorted = Object.entries(probabilites).sort((a, b) => b[1] - a[1]);
+    const maxVal = sorted[0][1];
+
+    const lignes = sorted.map(([cls, p], i) => {
+        const pct  = (p * 100).toFixed(1);
+        const top  = i === 0 ? " top" : "";
+        return `
+            <div class="proba-row">
+                <span class="proba-label" title="${escHtml(cls)}">${escHtml(cls)}</span>
+                <div class="proba-track">
+                    <div class="proba-fill${top}" style="width:${pct}%"></div>
+                </div>
+                <span class="proba-pct">${pct}%</span>
+            </div>
+        `;
+    }).join("");
+
+    return `
+        <div class="proba-section">
+            <h2>Probabilités par classe</h2>
+            ${lignes}
+        </div>
+    `;
+}
+
+function afficherErreur(msg) {
+    zone.innerHTML = `<p class="error">${escHtml(msg)}</p>`;
+}
+
+function escHtml(str) {
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+}
+</script>
+ </body>
+</html>

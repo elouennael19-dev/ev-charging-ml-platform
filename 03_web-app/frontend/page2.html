@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Stations IRVE</title>
+	<!-- Feuille de style principale -->
+	<link rel="stylesheet" href="CSS/style.css">
+</head>
+
+<body>
+	<!-- En-tête avec les logos et la barre de navigation -->
+	<header class="header">
+		<div class="logos">
+			<img src="./logo/IRVE.png" alt="Logo IRVE" class="IRVE">
+			<img src="./logo/ISEN.png" alt="Logo ISEN" class="ISEN">
+		</div>
+
+		<!-- Liens de navigation entre les pages du site -->
+		<nav class="navbar">
+			<a href="index.html">Accueil</a>
+			<a href="page1.html">Visualisation</a>
+			<a href="page2.html" class="active">Statistiques</a>
+		</nav>
+	</header>
+
+	<main class="main">
+		<main class="content">
+			<h1>Statistiques par département</h1>
+			<p class="subtitle">Sélectionnez un département pour afficher ses indicateurs IRVE.</p>
+			<br>
+
+			<!-- Menu déroulant pour choisir un département, rempli dynamiquement via l'API -->
+			<div class="select-box">
+				<label for="departement">Département</label>
+				<select id="departement">
+					<option value="">-- Choisir un département --</option>
+				</select>
+			</div>
+
+			<!-- Zone d'affichage des statistiques, mise à jour après sélection d'un département -->
+			<div class="info-box" id="infoBox">
+				<span id="infoText">Sélectionnez un département dans le menu ci-dessus pour afficher ses statistiques IRVE.</span>
+				<div id="stats" style="display:none; margin-top: 12px;"></div>
+			</div>
+
+		</main>
+	</main>
+
+	<footer class="footer">
+		<h5>Mentions Légales © 2026 Copyright</h5>
+		<h4>Réalisé par le Groupe 5: Elouen, Brayan, Maël</h4>
+	</footer>
+
+	<script>
+		// URLs des APIs PHP utilisées sur cette page
+		const API_DEPS  = "php/api_departements.php";
+		const API_STATS = "php/api_stats_departement.php?departement=";
+
+		// Récupère les éléments HTML à manipuler
+		const selectDep = document.getElementById("departement");
+		const infoText  = document.getElementById("infoText");
+		const statsBox  = document.getElementById("stats");
+
+		// Charge la liste des départements depuis l'API et remplit le menu déroulant
+		async function loadDepartements() {
+			try {
+				infoText.textContent = "Chargement des départements…";
+				statsBox.style.display = "none";
+				statsBox.innerHTML = "";
+
+				const res = await fetch(API_DEPS);
+				if (!res.ok) throw new Error("Erreur API départements: " + res.status);
+
+				const deps = await res.json();
+
+				// Réinitialise le select puis ajoute une option par département
+				selectDep.innerHTML = '<option value="">-- Choisir un département --</option>';
+				deps.forEach(dep => {
+					const opt = document.createElement("option");
+					opt.value = dep;
+					opt.textContent = dep;
+					selectDep.appendChild(opt);
+				});
+
+				infoText.textContent = "Sélectionnez un département dans le menu ci-dessus pour afficher ses statistiques IRVE.";
+			} catch (err) {
+				console.error(err);
+				infoText.textContent = "Impossible de charger la liste des départements.";
+			}
+		}
+
+		// Charge et affiche les statistiques IRVE pour le département sélectionné
+		async function loadStats(dep) {
+			// Si aucun département sélectionné, réinitialise la zone d'affichage
+			if (!dep) {
+				infoText.textContent = "Sélectionnez un département dans le menu ci-dessus pour afficher ses statistiques IRVE.";
+				statsBox.style.display = "none";
+				statsBox.innerHTML = "";
+				return;
+			}
+
+			try {
+				infoText.textContent = `Chargement des statistiques pour ${dep}…`;
+				statsBox.style.display = "none";
+				statsBox.innerHTML = "";
+
+				const res = await fetch(API_STATS + encodeURIComponent(dep));
+				if (!res.ok) throw new Error("Erreur API stats: " + res.status);
+
+				const data = await res.json();
+
+				// Affiche les statistiques reçues dans la zone d'information
+				statsBox.style.display = "block";
+				statsBox.innerHTML = `
+					<h2 style="margin:0 0 8px 0;">Résultats</h2>
+					<ul style="margin:0; padding-left:18px;">
+						<li><strong>Nombre de stations :</strong> ${data.nb_stations}</li>
+						<li><strong>Nombre total de points de charge :</strong> ${data.nb_points_charge}</li>
+						<li><strong>% stations accessibles PMR :</strong> ${data.pct_stations_pmr} %</li>
+						<li><strong>Fournisseur le plus présent :</strong> ${data.top_fournisseur} (${data.top_fournisseur_nb_stations})</li>
+					</ul>
+				`;
+
+				// Vide le texte d'aide pour éviter le doublon avec les résultats
+				infoText.textContent = "";
+			} catch (err) {
+				console.error(err);
+				infoText.textContent = "Erreur lors du chargement des statistiques.";
+				statsBox.style.display = "none";
+				statsBox.innerHTML = "";
+			}
+		}
+
+		// Déclenche le chargement des stats à chaque changement de département dans le select
+		selectDep.addEventListener("change", (e) => loadStats(e.target.value));
+
+		// Charge la liste des départements au chargement de la page
+		loadDepartements();
+	</script>
+</body>
+</html>

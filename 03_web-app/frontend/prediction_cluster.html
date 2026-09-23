@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clusters - Stations IRVE</title>
+
+    <link rel="stylesheet" href="CSS/style.css">
+<!--bibliothèque pour la carte-->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+</head>
+
+<body>
+
+<header class="header">
+    <!--afficge les logos-->
+    <div class="logos">
+        <img src="./logo/IRVE.png" alt="Logo IRVE" class="IRVE">
+        <img src="./logo/ISEN.png" alt="Logo ISEN" class="ISEN">
+    </div>
+<!--menu de navigation-->
+    <nav class="navbar">
+        <a href="index.html">Accueil</a>
+        <a href="page1.html">Visualisation</a>
+        <a href="page2.html">Statistiques</a>
+    </nav>
+</header>
+
+<main class="main">
+<!--carte clusters-->
+    <section class="card">
+        <h2>Carte des clusters géographiques</h2>
+        <p>Stations IRVE colorées selon le cluster prédit par le modèle KMeans.</p>
+        <!--légende des couleurs de clusters-->
+        <div class="cluster-legend">
+            <span><b class="cluster-dot cluster-0"></b> Cluster 0</span>
+            <span><b class="cluster-dot cluster-1"></b> Cluster 1</span>
+            <span><b class="cluster-dot cluster-2"></b> Cluster 2</span>
+            <span><b class="cluster-dot cluster-3"></b> Cluster 3</span>
+            <span><b class="cluster-dot cluster-4"></b> Cluster 4</span>
+        </div>
+<!---emplacement de la carte-->
+        <div id="clusterMap"></div>
+    </section>
+
+</main>
+<!--pied de page-->
+<footer class="footer">
+    <h5>Mentions légales © 2026 Copyright</h5>
+    <h4>Réalisé par le Groupe 5 : Elouen, Brayan, Maël</h4>
+</footer>
+
+<script>
+//crée une carte centrée sur la frane
+    const clusterMap = L.map('clusterMap').setView([46.6, 2.5], 6);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+    }).addTo(clusterMap);
+    //associe une couleur à chaque cluster
+    const couleurs = {
+        0: "#84cc16",
+        1: "#60a5fa",
+        2: "#ec4899",
+        3: "#8b5cf6",
+        4: "#f97316"
+    };
+    //appel du php/get_clusters.php
+    fetch("php/get_clusters.php")
+        .then(response => response.text())
+        .then(text => {
+            console.log("Réponse brute PHP :", text);
+    // convertit la réponse eb objet Javascript
+            const data = JSON.parse(text);
+    // parcours toues les stations renvoyées par python
+            data.stations.forEach(station => {
+                const lat = parseFloat(station.latitude);
+                const lon = parseFloat(station.longitude);
+                const cluster = parseInt(station.cluster);
+    
+                L.circleMarker([lat, lon], {
+                    radius: 10,
+                    color: couleurs[cluster],
+                    fillColor: couleurs[cluster],
+                    fillOpacity: 0.85
+                })
+                .addTo(clusterMap)
+                // affiche infos clusters quand on clique dessus
+                .bindPopup(`
+                    <strong>${station.nom_station}</strong><br>
+                    Ville : ${station.nom_ville}<br>
+                    Cluster : ${cluster}
+                `);
+            });
+        })
+        .catch(error => {
+            console.error("Erreur complète :", error);
+        });
+    </script>
+</body>
+</html>
