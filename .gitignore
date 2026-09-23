@@ -1,0 +1,36 @@
+# === Données (jamais versionnées, sauf l'échantillon) ===
+data/raw/
+data/processed/
+*.csv
+*.parquet
+*.xlsx
+!data/sample/*.csv
+
+# === Modèles entraînés (lourds, régénérables) ===
+*.pkl
+*.joblib
+models/
+
+# === Secrets ===
+.env
+.env.*
+!.env.example
+config.local.*
+
+# === Python ===
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# === R ===
+.Rhistory
+.RData
+.Rproj.user/
+renv/library/
+
+# === OS / éditeurs ===
+.DS_Store
+.vscode/
+.idea/
