@@ -9,7 +9,6 @@ data/processed/
 # === Modèles entraînés (lourds, régénérables) ===
 *.pkl
 *.joblib
-models/
 
 # === Secrets ===
 .env
